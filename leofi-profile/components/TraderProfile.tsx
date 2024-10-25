@@ -111,7 +111,8 @@ export default function TraderProfile() {
       try {
         // Request connection to MetaMask wallet
         const accounts = await window.ethereum.request({ 
-          method: 'eth_requestAccounts' 
+          method: 'eth_requestAccounts',
+          params: []
         });
         
         if (accounts.length > 0) {
