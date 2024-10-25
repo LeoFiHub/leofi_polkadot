@@ -4,14 +4,9 @@ declare global {
   interface Window {
     ethereum: {
       request: (args: { 
-        method: string,
+        method: any,
         params: any
        }) => Promise<any>;
-    };
-    aptos: {
-      connect: () => Promise<any>;
-      getAccountResources: (args: { method: string }) => Promise<any>;
-      signAndSubmitTransaction: (args: any) => Promise<any>;
     };
   }
 }
@@ -49,27 +44,8 @@ import {
   TableRow,
 } from "./ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import {
-  useWallet,
-} from "@aptos-labs/wallet-adapter-react";
-
-import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
 
 export default function TraderProfile() {  
-  const aptosConfig = new AptosConfig({ network: Network.DEVNET });
-  const aptos = new Aptos(aptosConfig);
-  const {    
-    network,
-    connected,
-    disconnect,
-    wallet,
-    wallets,
-    connect,
-    signAndSubmitTransaction,
-    signTransaction,
-    signMessage,
-    signMessageAndVerify 
-  } = useWallet();
   const [account, setAccount] = useState<string | null>(null)
   const [balance, setBalance] = useState<string | null>(null)
   const [isFollowing, setIsFollowing] = useState(false)
@@ -78,7 +54,7 @@ export default function TraderProfile() {
   const [fromAmount, setFromAmount] = useState('')
   const [toAmount, setToAmount] = useState('')
   const [exchangeRate, setExchangeRate] = useState(1800)
-  const [selectedToken, setSelectedToken] = useState('APT')
+  const [selectedToken, setSelectedToken] = useState('XAU')
   const [tradeType, setTradeType] = useState('buy')
   const [amount, setAmount] = useState('')
   const [showCrossChainPopup, setShowCrossChainPopup] = useState(false)
@@ -134,7 +110,9 @@ export default function TraderProfile() {
     if (window.ethereum) {
       try {
         // Request connection to MetaMask wallet
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const accounts = await window.ethereum.request({ 
+          method: 'eth_requestAccounts' 
+        });
         
         if (accounts.length > 0) {
           // Set the connected account address
@@ -153,31 +131,7 @@ export default function TraderProfile() {
       }
     } else {
       console.log('Please install MetaMask!');
-    } 
-
-    // if ('aptos' in window) {
-    //   try {
-    //     // Request connection to Petra wallet
-    //     const response = await window.aptos.connect();
-        
-    //     if (response.address) {
-    //       // Set the connected account address
-    //       setAccount(response.address);
-          
-    //       // Get the account balance
-    //       const resource = await window.aptos.getAccountResources(response.address);
-    //       const accountResource = resource.find((r) => r.type === '0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>');
-    //       if (accountResource) {
-    //         const balance = accountResource.data.coin.value;
-    //         setBalance(JSON.stringify(balance / 100000000)); // Convert octas to APT
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.error('Failed to connect wallet:', error);
-    //   }
-    // } else {
-    //   console.log('Please install Petra wallet!');
-    // }   
+    }   
   }
 
   // Helper function to format address for display
@@ -232,27 +186,6 @@ export default function TraderProfile() {
     } catch (error) {
         console.error('Transaction failed:', error);
     }
-
-
-    // console.log(`${tradeType.toUpperCase()} ${amount} ${selectedToken}`)
-    // // Implement actual trading logic here
-
-    // const moduleAddress = "0xf1a29176e0690487a0d8e10aec8d681935fe678ddc96165800d5f6f2b25b0c6f"
-    // const addr = "0xe8ec9945a78a48452def46207e65a0a4ed6acd400306b977020924ae3652ab85"
-    // const symbol = 'PQD'
-    // const type = `${addr}::${symbol}::${symbol}`
-    // const transaction = {
-    //   function: `${moduleAddress}::leofi_module::buy`,
-    //   type: 'entry_function_payload',
-    //   type_arguments: [type],
-    //   arguments: [
-    //     24,
-    //     11
-    //   ],
-    // };
-
-    // const response = await window.aptos.signAndSubmitTransaction(transaction);
-    // alert(`Transaction successfully: ${response.hash}`)
   }
 
   const handleCrossChainSwap = async (e: React.FormEvent) => {
@@ -260,27 +193,12 @@ export default function TraderProfile() {
     // Here you would typically initiate the cross-chain swap process
 
     console.log(`${tradeType.toUpperCase()} ${amount} ${selectedToken}`)
-    // Implement actual trading logic here
-
-    const moduleAddress = "0xf1a29176e0690487a0d8e10aec8d681935fe678ddc96165800d5f6f2b25b0c6f"
-    const addr = "0xe8ec9945a78a48452def46207e65a0a4ed6acd400306b977020924ae3652ab85"
-    const symbol = 'PQD'
-    const type = `${addr}::${symbol}::${symbol}`
-    const transaction = {
-      function: `${moduleAddress}::leofi_module::buy`,
-      type: 'entry_function_payload',
-      type_arguments: [type],
-      arguments: [
-        24,
-        11
-      ],
-    };
-    const response = await window.aptos.signAndSubmitTransaction(transaction);
-    alert(`Transaction successfully: ${response.hash}`)
+    // Implement actual trading logic here   
+    alert('Transaction successfully')
     setShowCrossChainPopup(false)
   }
 
-  const recommendedTokens = ['XRP', 'MOJO', 'TORT', 'HIPPO', 'ZAPT'];
+  const recommendedTokens = ['XAU', 'XAG', 'OIL'];
 
   // Mock data for the trading chart
   const tradingChartData = [
@@ -301,11 +219,9 @@ export default function TraderProfile() {
     price: string;
     txHash: string;
   }>>([
-    { date: '2023-10-01', token: 'APT', type: 'Buy', amount: '100', price: '$10.50', txHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' },
-    { date: '2023-09-28', token: 'BTC', type: 'Sell', amount: '0.5', price: '$27,000', txHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890' },
-    { date: '2023-09-25', token: 'ETH', type: 'Buy', amount: '2', price: '$1,600', txHash: '0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba' },
-    { date: '2023-09-20', token: 'USDC', type: 'Buy', amount: '1000', price: '$1.00', txHash: '0xfedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210' },
-    { date: '2023-09-15', token: 'APT', type: 'Sell', amount: '50', price: '$11.20', txHash: '0x5432109876fedcba5432109876fedcba5432109876fedcba5432109876fedcba' },
+    { date: '2023-10-01', token: 'XAU', type: 'Buy', amount: '100', price: '$10.50', txHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef' },
+    { date: '2023-09-28', token: 'OIL', type: 'Sell', amount: '0.5', price: '$27,000', txHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890' },
+    { date: '2023-09-25', token: 'XAG', type: 'Buy', amount: '2', price: '$1,600', txHash: '0x9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba' },
   ])
 
   const [compoundAmount, setCompoundAmount] = useState<number>(1000) // Assuming $1000 profit for demonstration
@@ -374,7 +290,7 @@ export default function TraderProfile() {
               <TabsTrigger value="performance">Performance</TabsTrigger>
               <TabsTrigger value="background">Background</TabsTrigger>
               <TabsTrigger value="strategy">Strategy</TabsTrigger>
-              <TabsTrigger value="trading">Trading</TabsTrigger>
+              <TabsTrigger value="trading">Tokenize</TabsTrigger>
               <TabsTrigger value="compound">Compound</TabsTrigger>
             </TabsList>
             <TabsContent value="performance">
@@ -543,10 +459,10 @@ export default function TraderProfile() {
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold mb-4">Trade</h3>
+                        <h3 className="text-lg font-semibold mb-4">Tokenize</h3>
                         <form onSubmit={handleTrade} className="space-y-4">
                           <div>
-                            <Label htmlFor="token">Token</Label>
+                            <Label htmlFor="token">asset</Label>
                             <Select value={selectedToken} onValueChange={setSelectedToken}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select token" />
@@ -559,14 +475,14 @@ export default function TraderProfile() {
                             </Select>
                           </div>
                           <div>
-                            <Label htmlFor="tradeType">Trade Type</Label>
+                            <Label htmlFor="tradeType">Asset Type</Label>
                             <Select value={tradeType} onValueChange={setTradeType}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select trade type" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="buy">Buy</SelectItem>
-                                <SelectItem value="sell">Sell</SelectItem>
+                                <SelectItem value="buy">Stock</SelectItem>
+                                <SelectItem value="sell">Bond</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -582,13 +498,13 @@ export default function TraderProfile() {
                           </div>
                           <Button type="submit" className="w-full">
                             <ArrowRightLeft className="mr-2 h-4 w-4" /> 
-                            {tradeType === 'buy' ? 'Buy' : 'Sell'} {selectedToken}
+                            {tradeType === 'buy' ? 'Stock' : 'Bond'} {selectedToken}
                           </Button>
                         </form>
                       </div>
                     </div>
                     <div className="mt-6">
-                      <h3 className="font-semibold mb-2">Recommended Tokens:</h3>
+                      <h3 className="font-semibold mb-2">Recommended Assets:</h3>
                       <div className="flex flex-wrap gap-2">
                         {recommendedTokens.map((token) => (
                           <Badge key={token} variant="secondary">{token}</Badge>
@@ -599,14 +515,14 @@ export default function TraderProfile() {
                 </Card>
                 <Card>
                   <CardHeader>
-                    <CardTitle>Trading History</CardTitle>
+                    <CardTitle>Transaction History</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <Table>
                       <TableHeader>
                         <TableRow>
                           <TableHead>Date</TableHead>
-                          <TableHead>Token</TableHead>
+                          <TableHead>Asset</TableHead>
                           <TableHead>Type</TableHead>
                           <TableHead>Amount</TableHead>
                           <TableHead>Price</TableHead>
